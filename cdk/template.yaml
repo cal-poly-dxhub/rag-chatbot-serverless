@@ -1,0 +1,584 @@
+Resources:
+  IngestionPipelineProcessBucket2F985EE9:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: aws-cdk:auto-delete-objects
+          Value: "true"
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineProcessBucket/Resource
+  IngestionPipelineProcessBucketPolicy2F854B2F:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: IngestionPipelineProcessBucket2F985EE9
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:PutBucketPolicy
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::GetAtt:
+                  - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+                  - Arn
+            Resource:
+              - Fn::GetAtt:
+                  - IngestionPipelineProcessBucket2F985EE9
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineProcessBucket2F985EE9
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineProcessBucket/Policy/Resource
+  IngestionPipelineProcessBucketAutoDeleteObjectsCustomResourceB3A0448D:
+    Type: Custom::S3AutoDeleteObjects
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F
+          - Arn
+      BucketName:
+        Ref: IngestionPipelineProcessBucket2F985EE9
+    DependsOn:
+      - IngestionPipelineProcessBucketPolicy2F854B2F
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineProcessBucket/AutoDeleteObjectsCustomResource/Default
+  CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role
+  CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip
+      Timeout: 900
+      MemorySize: 128
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+          - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+          - Arn
+      Runtime: nodejs20.x
+      Description:
+        Fn::Join:
+          - ""
+          - - "Lambda function for auto-deleting objects in "
+            - Ref: IngestionPipelineProcessBucket2F985EE9
+            - " S3 bucket."
+    DependsOn:
+      - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler
+      aws:asset:path: asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6
+      aws:asset:property: Code
+  IngestionPipelineInputValidationServiceRoleFDFBB3F3:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineInputValidation/ServiceRole/Resource
+  IngestionPipelineInputValidationServiceRoleDefaultPolicy6952E719:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - IngestionPipelineProcessBucket2F985EE9
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineProcessBucket2F985EE9
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: IngestionPipelineInputValidationServiceRoleDefaultPolicy6952E719
+      Roles:
+        - Ref: IngestionPipelineInputValidationServiceRoleFDFBB3F3
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineInputValidation/ServiceRole/DefaultPolicy/Resource
+  IngestionPipelineInputValidationE1D34159:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8.zip
+      Environment:
+        Variables:
+          PROCESSING_BUCKET:
+            Ref: IngestionPipelineProcessBucket2F985EE9
+      Handler: validate_input.handler
+      MemorySize: 256
+      Role:
+        Fn::GetAtt:
+          - IngestionPipelineInputValidationServiceRoleFDFBB3F3
+          - Arn
+      Runtime: python3.11
+      Timeout: 300
+    DependsOn:
+      - IngestionPipelineInputValidationServiceRoleDefaultPolicy6952E719
+      - IngestionPipelineInputValidationServiceRoleFDFBB3F3
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineInputValidation/Resource
+      aws:asset:path: asset.bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  IngestionPipelineVectorStoreServiceRoleCB6E0DD0:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineVectorStore/ServiceRole/Resource
+  IngestionPipelineVectorStoreServiceRoleDefaultPolicy3309BB53:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - IngestionPipelineProcessBucket2F985EE9
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineProcessBucket2F985EE9
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: IngestionPipelineVectorStoreServiceRoleDefaultPolicy3309BB53
+      Roles:
+        - Ref: IngestionPipelineVectorStoreServiceRoleCB6E0DD0
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineVectorStore/ServiceRole/DefaultPolicy/Resource
+  IngestionPipelineVectorStoreA5F968A0:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8.zip
+      Environment:
+        Variables:
+          PROCESSING_BUCKET:
+            Ref: IngestionPipelineProcessBucket2F985EE9
+      Handler: vector_store_management.handler
+      MemorySize: 256
+      Role:
+        Fn::GetAtt:
+          - IngestionPipelineVectorStoreServiceRoleCB6E0DD0
+          - Arn
+      Runtime: python3.11
+      Timeout: 300
+    DependsOn:
+      - IngestionPipelineVectorStoreServiceRoleDefaultPolicy3309BB53
+      - IngestionPipelineVectorStoreServiceRoleCB6E0DD0
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineVectorStore/Resource
+      aws:asset:path: asset.bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  IngestionPipelineEmbeddingsServiceRole180B03DE:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineEmbeddings/ServiceRole/Resource
+  IngestionPipelineEmbeddingsServiceRoleDefaultPolicyE89DB62E:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - IngestionPipelineProcessBucket2F985EE9
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineProcessBucket2F985EE9
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: IngestionPipelineEmbeddingsServiceRoleDefaultPolicyE89DB62E
+      Roles:
+        - Ref: IngestionPipelineEmbeddingsServiceRole180B03DE
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineEmbeddings/ServiceRole/DefaultPolicy/Resource
+  IngestionPipelineEmbeddings235D1618:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8.zip
+      Handler: create_embedding.handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt:
+          - IngestionPipelineEmbeddingsServiceRole180B03DE
+          - Arn
+      Runtime: python3.11
+      Timeout: 300
+    DependsOn:
+      - IngestionPipelineEmbeddingsServiceRoleDefaultPolicyE89DB62E
+      - IngestionPipelineEmbeddingsServiceRole180B03DE
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/IngestionPipelineEmbeddings/Resource
+      aws:asset:path: asset.bf45db2fa62b1547eb66e77bbebcb282f6f305f847cb9a506a54bb0301776aa8
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  DocumentIngestionStateMachineRole46CF8C72:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/DocumentIngestionStateMachine/Role/Resource
+  DocumentIngestionStateMachineRoleDefaultPolicy9045CF66:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: lambda:InvokeFunction
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - IngestionPipelineEmbeddings235D1618
+                  - Arn
+              - Fn::GetAtt:
+                  - IngestionPipelineInputValidationE1D34159
+                  - Arn
+              - Fn::GetAtt:
+                  - IngestionPipelineVectorStoreA5F968A0
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineEmbeddings235D1618
+                        - Arn
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineInputValidationE1D34159
+                        - Arn
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - IngestionPipelineVectorStoreA5F968A0
+                        - Arn
+                    - :*
+          - Action:
+              - s3:AbortMultipartUpload
+              - s3:GetObject
+              - s3:ListMultipartUploadParts
+              - s3:PutObject
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:"
+                  - Ref: AWS::Partition
+                  - ":s3:::"
+                  - Ref: IngestionPipelineProcessBucket2F985EE9
+                  - /*
+        Version: "2012-10-17"
+      PolicyName: DocumentIngestionStateMachineRoleDefaultPolicy9045CF66
+      Roles:
+        - Ref: DocumentIngestionStateMachineRole46CF8C72
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/DocumentIngestionStateMachine/Role/DefaultPolicy/Resource
+  DocumentIngestionStateMachineADA51FFF:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionString:
+        Fn::Join:
+          - ""
+          - - '{"StartAt":"DetectAndIdentifyDocuments","States":{"DetectAndIdentifyDocuments":{"Next":"AreThereDocumentsToIngest","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultSelector":{"Payload.$":"$.Payload"},"Resource":"arn:'
+            - Ref: AWS::Partition
+            - :states:::lambda:invoke","Parameters":{"FunctionName":"
+            - Fn::GetAtt:
+                - IngestionPipelineInputValidationE1D34159
+                - Arn
+            - '","Payload.$":"$"}},"AreThereDocumentsToIngest":{"Type":"Choice","Choices":[{"Variable":"$.Payload.isValid","BooleanEquals":false,"Next":"SucceedState"}],"Default":"VectorStoreManagement"},"VectorStoreManagement":{"Next":"DistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultPath":null,"Resource":"arn:'
+            - Ref: AWS::Partition
+            - :states:::lambda:invoke","Parameters":{"FunctionName":"
+            - Fn::GetAtt:
+                - IngestionPipelineVectorStoreA5F968A0
+                - Arn
+            - '","Payload.$":"$"}},"DistributedMap":{"Type":"Map","Next":"SucceedState","ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"GenerateEmbeddings","States":{"GenerateEmbeddings":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:'
+            - Ref: AWS::Partition
+            - :states:::lambda:invoke","Parameters":{"FunctionName":"
+            - Fn::GetAtt:
+                - IngestionPipelineEmbeddings235D1618
+                - Arn
+            - '","Payload.$":"$"}}}},"MaxConcurrency":50,"ItemReader":{"Resource":"arn:'
+            - Ref: AWS::Partition
+            - :states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"
+            - Ref: IngestionPipelineProcessBucket2F985EE9
+            - "\",\"Key.$\":\"States.Format('ingestion_input/{}/config.json', $$.Execution.Name)\"}},\"ResultWriter\":{\"Resource\":\"arn:"
+            - Ref: AWS::Partition
+            - :states:::s3:putObject","Parameters":{"Bucket":"
+            - Ref: IngestionPipelineProcessBucket2F985EE9
+            - "\",\"Prefix.$\":\"States.Format('ingestion_output/{}/sf-results', $$.Execution.Name)\"}}},\"SucceedState\":{\"Type\":\"Succeed\"}}}"
+      RoleArn:
+        Fn::GetAtt:
+          - DocumentIngestionStateMachineRole46CF8C72
+          - Arn
+    DependsOn:
+      - DocumentIngestionStateMachineRoleDefaultPolicy9045CF66
+      - DocumentIngestionStateMachineRole46CF8C72
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/DocumentIngestionStateMachine/Resource
+  DocumentIngestionStateMachineDistributedMapPolicy4EEE2551:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: states:StartExecution
+            Effect: Allow
+            Resource:
+              Ref: DocumentIngestionStateMachineADA51FFF
+          - Action:
+              - states:DescribeExecution
+              - states:StopExecution
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - Ref: DocumentIngestionStateMachineADA51FFF
+                  - :*
+        Version: "2012-10-17"
+      PolicyName: DocumentIngestionStateMachineDistributedMapPolicy4EEE2551
+      Roles:
+        - Ref: DocumentIngestionStateMachineRole46CF8C72
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/DocumentIngestionStateMachine/DistributedMapPolicy/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/+1WW4taMRD+LZvHJaa7FZZ239RtYaHLiu6biMRk1FnPSSQXiz3435vbEfeCD6VSWvog4cw3+fLNJRM/sutPN+zqgn+3HSHXnQrnrBk7LtY0mGaN7bKm78Ua3KQh3Dt9BxU4eJw/g3CW3DrjgRIDtd7yaqgrFDtySyRYZ/SO7Kd0sFB5P81L9glk8/QZnC9fuGW8OPe5hcl0TytezyVnzVevhEOtwnZQWzRa1aAyByV1EGF2Y/wBxeCwBu1bWGjZAiuuZAWmfBmvomdWQkOUUn45Jp8kr0syjeAfOva3HJKy3KZwT5HXrBnpCmJlrfU1yH4oXkM2BpXADa96Qmh/CDT7xA29xFCUk5orvgSZCocQeiLwHdt2PVN8pyXOJz1sj2hbZtIU1IXeW92rChUcsDYLp8H/IfzVIZxV1Wne86G/pjhd1JgfWqZlTFu74UlH5A3PW7OUYY47iNPEtpL+YaLzmqUW/jD0T0l7x5zKmSu5p7Y7C/0PzrJeXKh1sFmUmWxnjtu1Zd/Sc3evtnoNLx1Yc4fhacW5dyAf+IYOVhoF0LEXAkDSJP0hKAg9FQaAhAUqzHesISjLBbSOG5dciwFUDtq+uooxinc7/pxAStdxIEHPwFun6xFY7Y2AlNZ0R4rhFT40eosSTPz7QFOaA90S1ZIeM9CjX2J79G7j3Z4Od26l1Ycu+8yuby6eLWKnvKNslNefH1OPNTYJAAA=
+    Metadata:
+      aws:cdk:path: DocumentIngestionStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  StateMachineARN:
+    Description: The ARN of the document ingestion state machine
+    Value:
+      Ref: DocumentIngestionStateMachineADA51FFF
+  ProcessingBucketName:
+    Description: The name of the S3 bucket for document processing
+    Value:
+      Ref: IngestionPipelineProcessBucket2F985EE9
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
