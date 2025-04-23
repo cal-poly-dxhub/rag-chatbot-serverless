@@ -2,7 +2,7 @@ opensearch_index_name: knowledge-base-docs
 opensearch_collection_name: chatbot-vs
 opensearch_endpoint: <your-opensearch-domain>.region.aoss.amazonaws.com
 
-input_bucket_name: knowledge-documents
+input_bucket_name: rag-knowledge-documents
 file_input_folder: files-to-process/
 bucket_image_folder: image_store/
 ingest_cache_file: cache_file.txt
