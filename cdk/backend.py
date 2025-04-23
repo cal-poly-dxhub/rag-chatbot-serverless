@@ -34,7 +34,7 @@ class RagBackendStack(Stack):
         bucket = s3.Bucket(
             self,
             "RAGDataBucket",
-            bucket_name=f"{config["input_bucket_name"]}-{uuid.uuid4().hex[:8]}",  # Specify your bucket name
+            bucket_name=f"{config['input_bucket_name']}-{uuid.uuid4().hex[:8]}",  # Specify your bucket name
             removal_policy=RemovalPolicy.RETAIN,  # RETAIN to prevent accidental deletion
             auto_delete_objects=False,
             versioned=True,  # Enable versioning
