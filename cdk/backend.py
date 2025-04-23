@@ -31,13 +31,13 @@ class RagBackendStack(Stack):
         # CDK FOR ASSETS INPUT BUCKET
         #################################################################################
 
+        unique_s3_bucket_name = f"{config['input_bucket_name']}-{uuid.uuid4().hex[:8]}"
         bucket = s3.Bucket(
             self,
             "RAGDataBucket",
-            bucket_name=f"{config['input_bucket_name']}-{uuid.uuid4().hex[:8]}",  # Specify your bucket name
+            bucket_name=unique_s3_bucket_name,  # Specify your bucket name
             removal_policy=RemovalPolicy.RETAIN,  # RETAIN to prevent accidental deletion
             auto_delete_objects=False,
-            versioned=True,  # Enable versioning
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # Block public access
         )
 
@@ -244,7 +244,7 @@ class RagBackendStack(Stack):
 
         chat_lambda.add_to_role_policy(iam.PolicyStatement(
             actions=["s3:GetObject"],
-            resources=[f"arn:aws:s3:::{config['input_bucket_name']}/*"],
+            resources=[f"arn:aws:s3:::{unique_s3_bucket_name}/*"],
             effect=iam.Effect.ALLOW
         ))
 
