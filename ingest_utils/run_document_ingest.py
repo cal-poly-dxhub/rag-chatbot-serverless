@@ -1,6 +1,6 @@
 """
 Script to run document ingest on lambdas.
-For every document in you s3 bucket's ingest folder a
+For every document in your s3 bucket's ingest folder a
 new lambda will be spawned to process it.
 """
 
