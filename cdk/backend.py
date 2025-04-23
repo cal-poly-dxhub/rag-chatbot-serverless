@@ -151,6 +151,8 @@ class RagBackendStack(Stack):
             type="data",
         )
 
+
+        # Removes https:// from Opensearch endpoint
         opensearch_endpoint = Fn.select(
             1, Fn.split("https://", cfn_collection.attr_collection_endpoint)
         )
