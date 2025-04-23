@@ -17,6 +17,7 @@ from constructs import Construct
 from pathlib import Path
 import yaml
 import json
+import uuid
 
 CONFIG_PATH = "../config.yaml"
 config = yaml.safe_load(open(CONFIG_PATH))
@@ -33,7 +34,7 @@ class RagBackendStack(Stack):
         bucket = s3.Bucket(
             self,
             "RAGDataBucket",
-            bucket_name=config["input_bucket_name"],  # Specify your bucket name
+            bucket_name=f"{config["input_bucket_name"]}-{uuid.uuid4().hex[:8]}",  # Specify your bucket name
             removal_policy=RemovalPolicy.RETAIN,  # RETAIN to prevent accidental deletion
             auto_delete_objects=False,
             versioned=True,  # Enable versioning
