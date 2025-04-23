@@ -82,6 +82,11 @@ Clone the repo:
 git clone https://github.com/cal-poly-dxhub/rag-chatbot-serverless.git
 ```
 
+Rename example config file:
+```bash
+mv example_config.yaml config.yaml
+```
+
 Install `requirements.txt`:
 ```bash
 python3 -m venv .venv
