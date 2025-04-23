@@ -1,3 +1,9 @@
+"""
+Script to run document ingest on lambdas.
+For every document in you s3 bucket's ingest folder a
+new lambda will be spawned to process it.
+"""
+
 import aioboto3
 import asyncio
 import json
@@ -18,7 +24,7 @@ timeout_config = Config(
 
 config = yaml.safe_load(open("../config.yaml"))
 
-os.environ['AWS_DEFAULT_REGION'] = config['region']
+os.environ["AWS_DEFAULT_REGION"] = config["region"]
 
 function_name = config["ingest_lambda_name"]
 
