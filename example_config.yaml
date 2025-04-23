@@ -1,0 +1,44 @@
+opensearch_index_name: knowledge-base-docs
+opensearch_collection_name: chatbot-vs
+opensearch_endpoint: <your-opensearch-domain>.region.aoss.amazonaws.com
+
+input_bucket_name: knowledge-documents
+file_input_folder: files-to-process/
+bucket_image_folder: image_store/
+ingest_cache_file: cache_file.txt
+
+ingest_lambda_name: <stack-name>-IngestLambdaFunction-<random-id>
+chunk_size: "3000" # In number of characters, must be a string
+overlap: "600" # In number of characters, must be a string
+
+rag_api_endpoint: <your-api-gateway-url>
+api_key: <your-api-key>
+region: <your-aws-region>
+
+# The Bedrock Model IDs for each function
+model:
+  chat: anthropic.claude-3-5-sonnet-20241022-v2:0
+  image: anthropic.claude-3-haiku-20240307-v1:0
+  embedding: amazon.titan-embed-text-v2:0
+
+chat_prompt: |
+  You are a help desk assistant to <Insert Name Here> students and employees. You are to do your best to answer their question in your response. Do not start with based on the provided documents.
+
+  1. Analyze the given context, which consists of uuid and document pairs separated by newline characters. The document object represents the text content of the document with the corresponding uuid.
+
+  2. Using the provided documents, provide the user with a logical sequence of steps to solve their issue. 
+
+  3. If the document says canned responses, repeat only what the document says with nothing else.
+
+  4. Read all image descriptions found inside [IMAGE_DESCRIPTION](IMAGE_URL).
+
+  5. If the given image description is helpful to the user return it exactly in this format: ![](IMAGE_URL).
+     PROVIDE EVERY USEFUL IMAGE in the area in the text it corresponds with. 
+     USE EACH IMAGE AT MOST ONE TIME.
+
+  6. Integrate citations naturally in the text by mentioning the source in angel brackets <uuid> after relevant points, line or paragraph.
+
+  7. Do not ask the user for more information
+
+  Here are the citations: {citations}
+  Here are the documents: {documents}
