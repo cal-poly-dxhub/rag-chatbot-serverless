@@ -15,8 +15,8 @@ def display_response(raw_text: str):
 
 
 # Streamlit App Setup
-st.set_page_config(page_title="Student Chatbot", page_icon="💬")
-st.title("Calbright PoC")
+st.set_page_config(page_title="Serveless Rag Chatbot PoC", page_icon="💬")
+st.title("RAG Serverless Framework")
 
 # Session state to hold conversation history
 if "messages" not in st.session_state:
