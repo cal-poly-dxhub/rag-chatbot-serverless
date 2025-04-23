@@ -158,7 +158,12 @@ def process_image(page, block, model_id, image_count, pdf_path, bucket_name):
 
     file_name = os.path.basename(pdf_path).replace(" ", "_")
     image_uri = save_image_to_s3(
-        pil_image, file_name, page.number, image_count, bucket_name, os.getenv("IMAGE_FOLDER_NAME")
+        pil_image,
+        file_name,
+        page.number,
+        image_count,
+        bucket_name,
+        os.getenv("IMAGE_FOLDER_NAME"),
     )
 
     image_description = describe_image_with_claude(pil_image, model_id)
@@ -167,6 +172,10 @@ def process_image(page, block, model_id, image_count, pdf_path, bucket_name):
 
 
 def extract_lines_and_images(pdf_path, image_model_id, bucket_name):
+    """
+    Extract texts lines and images from pdf
+    in markdown format with references to s3 image objects.
+    """
     # Open the PDF document
     doc = pymupdf.open(pdf_path)
 
@@ -257,6 +266,7 @@ def lambda_handler(event, context):
         local_pdf_path, image_model_id, bucket_name
     )
 
+    # Chunk larger docs, leave smaller docs as is
     if num_pages > 2:
         document_chunks = mark_document_chunks(
             markdown_text, int(os.getenv("CHUNK_SIZE")), int(os.getenv("OVERLAP"))
@@ -280,6 +290,6 @@ def lambda_handler(event, context):
 
     os.remove(local_pdf_path)
 
-    print("Document {s3_uri} proccessed successfully!")
+    print(f"Document {s3_uri} proccessed successfully!")
 
     return {"statusCode": 200, "body": f"Document {s3_uri} proccessed successfully!"}
