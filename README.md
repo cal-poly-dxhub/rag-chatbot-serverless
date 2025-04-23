@@ -1,4 +1,4 @@
-# Helpdesk Chatbot Solution
+# RAG Serverless Chatbot Solution
 
 
 ## Table of Contents
@@ -43,7 +43,7 @@ Thanks for your interest in our solution.  Having specific examples of replicati
 
 
 ## Chatbot Overview
-- The [DxHub](https://dxhub.calpoly.edu/challenges/) developed a helpdesk chatbot solution that can answer user questions pulling from their knowledge base articles. The chatbot contains many features: 
+- The [DxHub](https://dxhub.calpoly.edu/challenges/) developed a chatbot solution that can answer user questions pulling from their knowledge base articles. The chatbot contains many features: 
 
     #### Intelligent Question Answering
     - Leverages Retrieval Augmented Generation (RAG) for accurate and contextual responses
@@ -69,22 +69,22 @@ Thanks for your interest in our solution.  Having specific examples of replicati
 
 ## Deployment Steps
 
-## Prerequisites
+### Prerequisites
 - AWS CDK CLI
 - Docker
 - Python 3.x
 - AWS credentials
-- Bedrock Model access for all used models
+- Bedrock model access
 - Git
 
 Clone the repo:
 ```bash
-git clone https://github.com/cal-poly-dxhub/calbright-assistant.git
+git clone https://github.com/cal-poly-dxhub/rag-chatbot-serverless.git
 ```
 
 Install `requirements.txt`:
 ```bash
-cd calbright-assistant
+cd rag-chatbot-serverless
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
@@ -93,9 +93,6 @@ pip3 install -r requirements.txt
 ### 1. Infrastructure Deployment
 ```bash
 cd cdk
-
-# Activate virual env
-source .venv/bin/activate
 
 # Synthesize the CloudFormation template
 cdk synth
@@ -164,7 +161,7 @@ newgrp docker # Refresh group
 - Check S3 bucket permissions
 - Ensure all required dependencies are installed
 - Verify API endpoints are accessible via `chat_test.py`
-- If hitting throttling errors, try changing the chat model
+- If encountering throttling errors, try changing the chat model
 
 ## Known Bugs/Concerns
 - Quick PoC with no intent verification or error checking
