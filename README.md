@@ -84,7 +84,6 @@ git clone https://github.com/cal-poly-dxhub/rag-chatbot-serverless.git
 
 Install `requirements.txt`:
 ```bash
-cd rag-chatbot-serverless
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
