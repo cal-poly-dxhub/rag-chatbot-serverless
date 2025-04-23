@@ -1,3 +1,8 @@
+"""
+Script to check if an opensearch index exists.
+Creates index if it does not already exist.
+"""
+
 from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
 import boto3
 import yaml
