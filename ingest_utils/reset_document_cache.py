@@ -1,3 +1,5 @@
+"""Script to reset the document cache held in s3."""
+
 import boto3
 import yaml
 
