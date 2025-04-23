@@ -77,6 +77,11 @@ Thanks for your interest in our solution.  Having specific examples of replicati
 - Bedrock model access
 - Git
 
+Configure AWS Credentials and Region with an Access key
+```bash
+aws configure
+```
+
 Clone the repo:
 ```bash
 git clone https://github.com/cal-poly-dxhub/rag-chatbot-serverless.git
