@@ -113,6 +113,7 @@ After deployment, update the config file with CDK outputs:
 | `rag_api_endpoint` | RAG API endpoint URL |
 | `api_key` | API Key (obtain from console under API keys) |
 | `region` | AWS Region |
+| `chat_prompt` | Fill in your organization's name |
 
 ### 3. File Upload to S3
 Upload local files to S3 bucket with the specified prefix:
@@ -163,6 +164,7 @@ newgrp docker # Refresh group
 - Check S3 bucket permissions
 - Ensure all required dependencies are installed
 - Verify API endpoints are accessible via `chat_test.py`
+- If hitting throttling errors, try changing the chat model
 
 ## Known Bugs/Concerns
 - Quick PoC with no intent verification or error checking
